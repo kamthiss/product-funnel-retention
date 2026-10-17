@@ -1,4 +1,8 @@
+ipykernel==6.31.0
+matplotlib==3.9.4
+nbconvert==7.17.2
 numpy==2.0.2
 pandas==2.3.3
 pandera==0.26.1
 psycopg[binary]==3.2.13
+statsmodels==0.14.6
