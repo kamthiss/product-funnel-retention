@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    env_file: .env
+    environment:
+      TZ: UTC
+      PGTZ: UTC
+    command: postgres -c timezone=UTC
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
