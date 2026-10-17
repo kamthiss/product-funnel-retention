@@ -1,4 +1,4 @@
-drop table if exists mart.users;
+drop table if exists mart.users cascade;
 create table mart.users as
 with s as (
     select
@@ -36,7 +36,7 @@ join attrs a using (user_id);
 
 alter table mart.users add primary key (user_id);
 
-drop table if exists mart.events;
+drop table if exists mart.events cascade;
 create table mart.events as
 select
     event_id, user_id, event_name, event_ts, client_ts, clock_skew_flag,
