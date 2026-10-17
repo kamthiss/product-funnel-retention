@@ -19,14 +19,16 @@ P = {
     'android_onboarding_drop': 0.12,
     'p_activation': 0.50,
     'activation_days': 7,
-    # вероятность вернуться на k-й неделе: p * mult[channel] * k ** -decay
+    # вероятность вернуться на k-й неделе: c * (e + (1 - e) * exp(-(k - 1) / tau)),
+    # c = p_return * mult[channel], e ~ Beta - уровень плато пользователя
     'p_return_active': 0.50,
     'p_return_inactive': 0.20,
-    'return_decay': 0.4,
+    'engagement_beta': (1.5, 3.5),
+    'novelty_tau_weeks': 2,
     'retention_mult': {'organic': 1.0, 'paid_social': 1 / 1.5, 'ads': 0.9, 'referral': 1.3},
     'sessions_per_week': 1.0,  # 1 + Poisson
     'p_project_in_session': 0.5,
-    'releases': {'2.1.0': '2026-01-12', '2.2.0': '2026-03-23', '2.3.0': '2026-04-27', '2.4.0': '2026-05-25'},
+    'releases': {'2.1.0': '2026-01-12', '2.2.0': '2026-03-23', '2.3.0': '2026-04-27', '2.3.1': '2026-05-07', '2.4.0': '2026-05-25'},
     'upgrade_lag_days': 5,
     'local_tz_version': '2.3.0',
     'p_dup': 0.03,
@@ -55,6 +57,7 @@ users = pd.DataFrame({
     'country': pick(P['country']),
     't0': rng.uniform(0, P['signup_weeks'] * WEEK, n),
     'lag': rng.exponential(P['upgrade_lag_days'] * DAY, n),
+    'eng': rng.beta(*P['engagement_beta'], n),
 })
 
 rows = []
@@ -78,10 +81,10 @@ for u in users.itertuples():
             rows.append((u.user_id, 'project_created', t + rng.exponential(300)))
             active = True
 
-    p1 = P['p_return_active' if active else 'p_return_inactive'] * P['retention_mult'][u.channel]
+    c = P['p_return_active' if active else 'p_return_inactive'] * P['retention_mult'][u.channel]
     k = 1
     while t + k * WEEK < horizon:
-        if rng.random() < p1 * k ** -P['return_decay']:
+        if rng.random() < c * (u.eng + (1 - u.eng) * np.exp(-(k - 1) / P['novelty_tau_weeks'])):
             n_sess = 1 + rng.poisson(P['sessions_per_week'])
             for s in rng.uniform(t + k * WEEK, t + (k + 1) * WEEK, n_sess):
                 rows.append((u.user_id, 'app_open', s))
