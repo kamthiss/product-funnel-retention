@@ -1,7 +1,7 @@
 PY = .venv/bin/python
 PSQL = docker compose exec -T db sh -c 'psql -q -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
-.PHONY: setup up data load marts notebook all test test-all reset-db down
+.PHONY: setup up data load marts notebook dashboard all test test-all reset-db down
 
 setup:
 	uv venv --managed-python --python 3.12 --clear .venv
@@ -26,6 +26,9 @@ marts:
 
 notebook:
 	.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/analysis.ipynb
+
+dashboard: up
+	$(PY) src/metabase_setup.py
 
 all: up data load marts
 
