@@ -1,7 +1,7 @@
 PY = .venv/bin/python
 PSQL = docker compose exec -T db sh -c 'psql -q -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
-.PHONY: setup up data load marts notebook all reset-db down
+.PHONY: setup up data load marts notebook all test test-all reset-db down
 
 setup:
 	uv venv --managed-python --python 3.12 --clear .venv
@@ -28,6 +28,12 @@ notebook:
 	.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/analysis.ipynb
 
 all: up data load marts
+
+test:
+	$(PY) -m pytest -m 'not db'
+
+test-all: all
+	$(PY) -m pytest
 
 reset-db: up
 	echo 'drop schema if exists staging cascade; drop schema if exists mart cascade;' | $(PSQL)
