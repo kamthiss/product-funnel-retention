@@ -52,10 +52,10 @@ memo.md                аналитическая записка
 
 ## Запуск
 
-Нужны Docker, Python 3.9+ и make.
+Нужны Docker, make и uv.
 
 ```bash
-make setup    # .venv, зависимости, .env из .env.example
+make setup    # .venv на Python 3.12, зависимости, .env из .env.example
 make all      # база, генерация, валидация, загрузка, витрины
 make notebook # перевыполнить ноутбук
 ```

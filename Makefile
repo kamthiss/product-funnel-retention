@@ -4,8 +4,8 @@ PSQL = docker compose exec -T db sh -c 'psql -q -v ON_ERROR_STOP=1 -U "$$POSTGRE
 .PHONY: setup up data load marts notebook all reset-db down
 
 setup:
-	python3 -m venv .venv
-	.venv/bin/pip install -r requirements.txt
+	uv venv --managed-python --python 3.12 --clear .venv
+	uv pip install --python .venv/bin/python -r requirements.txt
 	test -f .env || cp .env.example .env
 
 up:
@@ -29,7 +29,7 @@ notebook:
 
 all: up data load marts
 
-reset-db:
+reset-db: up
 	echo 'drop schema if exists staging cascade; drop schema if exists mart cascade;' | $(PSQL)
 
 down:
